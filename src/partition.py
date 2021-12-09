@@ -1,10 +1,10 @@
 import os
 import uuid
+from functools import cmp_to_key
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
 FILE_EACH_PARTITION = 3
-parent_dir = os.path.join(os.getcwd(), "upload")
 
 
 def check_full_z(name):
@@ -62,27 +62,78 @@ def next_string(s: str):
     return "".join(s)
 
 
-def save_file(file: FileStorage):
-    list_partition = sorted(os.listdir(parent_dir))  # list level1 + sorted
+def mkdir(path: str):
+    if not os.path.exists(path):
+        os.mkdir(path)
+
+def compare_path(item1: str, item2: str):
+    return_value = 1
+
+    if len(item1) > len(item2):
+        return_value = 1
+    elif len(item1) < len(item2):
+        return_value = -1
+    else:
+        if item1 > item2:
+            return_value = 1
+        elif item1 < item2:
+            return_value = -1
+        else: return_value = 0
+
+    return return_value
+
+def save_file(parent_dir, file: FileStorage):
+    list_partition = sorted(os.listdir(parent_dir), key=cmp_to_key(compare_path))  # list level1 + sorted
     partition = ""
 
     if len(list_partition) == 0:
         partition = "a"
-        os.mkdir(os.path.join(parent_dir, partition))
+        mkdir(os.path.join(parent_dir, partition))
     elif len(list_partition) > 0:
         partition = list_partition[len(list_partition) - 1]
 
     if len(os.listdir(os.path.join(parent_dir, partition))) >= FILE_EACH_PARTITION:
         partition = next_string(partition)
-        os.mkdir(os.path.join(parent_dir, partition))
+        mkdir(os.path.join(parent_dir, partition))
 
     secure_f = secure_filename(file.filename)
     extension = secure_f.rsplit(".", 1)[1]
     secure_f = os.path.join(
-        os.path.join(parent_dir, partition), str(uuid.uuid4()) + "." + extension
+        os.path.join(parent_dir, partition),
+        f"{secure_f.rsplit('.', 1)[0]}-{str(uuid.uuid4())}.{extension}",
     )
 
     file.save(secure_f)
+
+    return {
+        "filename": secure_f,
+        "size": os.stat(secure_f).st_size,
+        "size_measure": "bytes",
+    }
+
+
+def move_file(parent_dir, full_file_dir):
+    list_partition = sorted(os.listdir(parent_dir), key=cmp_to_key(compare_path))  # list level1 + sorted
+    partition = ""
+
+    if len(list_partition) == 0:
+        partition = "a"
+        mkdir(os.path.join(parent_dir, partition))
+    elif len(list_partition) > 0:
+        partition = list_partition[len(list_partition) - 1]
+
+    if len(os.listdir(os.path.join(parent_dir, partition))) >= FILE_EACH_PARTITION:
+        partition = next_string(partition)
+        mkdir(os.path.join(parent_dir, partition))
+
+    secure_f = secure_filename(os.path.basename(os.path.normpath(full_file_dir)))
+    extension = secure_f.rsplit(".", 1)[1]
+    secure_f = os.path.join(
+        os.path.join(parent_dir, partition),
+        f"{secure_f.rsplit('.', 1)[0]}-{str(uuid.uuid4())}.{extension}",
+    )
+
+    os.rename(full_file_dir, secure_f)
 
     return {
         "filename": secure_f,
