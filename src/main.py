@@ -1,12 +1,9 @@
 
 from flask import Flask, render_template, request
 from werkzeug.utils import secure_filename
+from partition import save_file
 
-from partition import get_newest_partition
-
-get_newest_partition()
-
-exit()
+import json
 
 app = Flask(__name__)
 
@@ -29,12 +26,13 @@ def upload_file():
             f.filename.rsplit('.', 1)[1].lower() == 'mp3' or
             f.filename.rsplit('.', 1)[1].lower() == 'mp4'):
 
-            f.save(secure_filename(f.filename))
-
-            return "file uploaded successfully"
+            return json.dumps(save_file(f))
         else:
             f.close()
-            return "file extension not supported"
+            return json.dumps({
+                    "error": 400,
+                    "message": "file extension not supported"
+                })
 
 
 if __name__ == "__main__":
