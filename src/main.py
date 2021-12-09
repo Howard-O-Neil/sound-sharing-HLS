@@ -24,7 +24,7 @@ def upload_file():
 
         if (f.filename.rsplit('.', 1)[1].lower() == 'wav' or
             f.filename.rsplit('.', 1)[1].lower() == 'mp3' or
-            f.filename.rsplit('.', 1)[1].lower() == 'mp4'):
+            f.filename.rsplit('.', 1)[1].lower() == 'm4a'):
 
             return json.dumps(save_file(f))
         else:
