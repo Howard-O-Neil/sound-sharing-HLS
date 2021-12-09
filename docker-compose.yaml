@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  nginx_rtmp:
+    build:
+        context: ./docker
+        dockerfile: nginx_rtmp.Dockerfile
+    volumes:
+      - ./src:/home/root/src:rw
+      - ./requirements.txt:/home/root/requirements.txt:rw
+      - ./container_share.log:/home/root/container_share.log
+    entrypoint: ["tail", "-f", "/home/root/container_share.log"]
+    networks:
+        sound-sharing-HLS:
+          ipv4_address: 128.0.3.2
+  
+
+networks:
+  sound-sharing-HLS:
+    ipam:
+      driver: default
+      config:
+        - subnet: "128.0.3.0/24"
