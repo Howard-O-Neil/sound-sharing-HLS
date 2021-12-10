@@ -14,7 +14,7 @@ RUN mkdir -p /usr/local/nginx-rtmp-module && \
 
 WORKDIR /usr/local/nginx-1.20.2
 
-RUN mkdir -p /mnt/hls 
+RUN mkdir -p /home/root/hls
 
 RUN ./configure --with-http_ssl_module --add-module=../nginx-rtmp-module
 RUN make -j 1
@@ -26,4 +26,4 @@ WORKDIR /home/root/
 
 RUN cat nginx.conf > /usr/local/nginx/conf/nginx.conf
 
-ENTRYPOINT [ "/usr/local/nginx/sbin/nginx" ]
+ENTRYPOINT [ "/usr/local/nginx/sbin/nginx", "-g", "daemon off;" ]

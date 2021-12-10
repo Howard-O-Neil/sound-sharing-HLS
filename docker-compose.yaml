@@ -6,13 +6,13 @@ services:
       context: ./docker
       dockerfile: stream_server.Dockerfile
     volumes:
-      - ./data/hls:/mnt/hls
-      - ./data/cdn:/mnt/cdn
+      - ./data/hls:/home/root/hls
+      - ./src/nginx.conf:/usr/local/nginx/conf/nginx.conf:rw
     ports:
       - "8089:1935" # nginx rtmp
       - "8088:8080" # nginx http
 
-    entrypoint: 
+    # entrypoint: use default in dockerfile 
     networks:
       sound-sharing-HLS:
         ipv4_address: 128.0.3.2
@@ -24,8 +24,10 @@ services:
       - ./src:/home/root/src:rw
       - ./requirements.txt:/home/root/requirements.txt:rw
       - ./container_share.log:/home/root/container_share.log
+      - ./data/cdn:/mnt/cdn
     ports:
       - "5055:5001" # flask server
+    # entrypoint: use default in dockerfile
     networks:
       sound-sharing-HLS:
         ipv4_address: 128.0.3.3

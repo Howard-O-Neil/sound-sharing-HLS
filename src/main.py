@@ -12,7 +12,6 @@ BASEDIR = os.path.abspath(os.path.dirname(__file__)) # get parent of this folder
 
 load_dotenv(os.path.join(BASEDIR, "development.env"))
 
-SOUND_DIR = os.getenv("SOUND_DIR")
 CDN_DIR = os.getenv("CDN_DIR")
 
 app = Flask(__name__)
@@ -34,9 +33,10 @@ def upload_file():
 
         if (f.filename.rsplit('.', 1)[1].lower() == 'wav' or
             f.filename.rsplit('.', 1)[1].lower() == 'mp3' or
-            f.filename.rsplit('.', 1)[1].lower() == 'm4a'):
+            f.filename.rsplit('.', 1)[1].lower() == 'm4a' or
+            f.filename.rsplit('.', 1)[1].lower() == 'mp4'):
 
-            return json.dumps(partition.save_file(SOUND_DIR, f))
+            return json.dumps(partition.save_file(CDN_DIR, f))
         else:
             f.close()
             return json.dumps({
@@ -48,7 +48,7 @@ def upload_file():
 def extract_wav_img():
     sound_id = request.args.get("sound-id")
 
-    return json.dumps(sound.get_wav(CDN_DIR, os.path.join(SOUND_DIR, sound_id)))
+    return json.dumps(sound.get_wav(CDN_DIR, os.path.join(CDN_DIR, sound_id)))
 
 
 if __name__ == "__main__":
