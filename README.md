@@ -7,3 +7,6 @@ HLS Stream server, CDN
 Our stream server is implemented in nginx
 
 Basically, we have our cdn stream content through ffmpeg. The cdn itself support endpoints to stream and end-stream its content
+
+## Short demo
+https://user-images.githubusercontent.com/64292857/145566213-02747836-6052-4399-8a38-febaf6444ae1.mp4
