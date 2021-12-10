@@ -8,19 +8,12 @@ import os
 
 from dotenv import load_dotenv
 
-def loadEnv():
-    environPath = None
+BASEDIR = os.path.abspath(os.path.dirname(__file__)) # get parent of this folder
 
-    flask_env = os.environ.get("FLASK_ENV")
-    environPath = f"{'development' if flask_env is None else flask_env}.env"
+load_dotenv(os.path.join(BASEDIR, "development.env"))
 
-    load_dotenv(environPath)
-
-
-loadEnv()
-
-SOUND_DIR = os.environ.get("SOUND_DIR")
-CDN_DIR = os.environ.get("CDN_DIR")
+SOUND_DIR = os.getenv("SOUND_DIR")
+CDN_DIR = os.getenv("CDN_DIR")
 
 app = Flask(__name__)
 
@@ -59,4 +52,4 @@ def extract_wav_img():
 
 
 if __name__ == "__main__":
-    app.run(port=5001, debug=True)
+    app.run(port=5001, debug=True, host='0.0.0.0')

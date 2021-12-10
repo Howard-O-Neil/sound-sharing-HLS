@@ -1,5 +1,7 @@
 import os
 import uuid
+import shutil
+from typing import List
 from functools import cmp_to_key
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
@@ -20,15 +22,26 @@ def next_letter(s: str):
     else:
         raise Exception("Not an alphabet")
 
-
-def next_string(s: str):
+def check_alphabet_path(s: str):
     s = list(s.lower())
 
     for char in s:
         if (char >= "a" and char <= "z") or (char >= "A" and char <= "Z"):
             continue
         else:
-            raise Exception("Not an alphabet")
+            return False
+    return True
+
+def get_latest_partition(l: List[str]):
+    l.reverse()
+
+    for path in l:
+        if not check_alphabet_path(path):
+            continue
+        else: return path
+
+def next_string(s: str):
+    s = list(s.lower())
 
     reverse_s = list(reversed(s))
     flag = False
@@ -66,6 +79,7 @@ def mkdir(path: str):
     if not os.path.exists(path):
         os.mkdir(path)
 
+
 def compare_path(item1: str, item2: str):
     return_value = 1
 
@@ -78,19 +92,23 @@ def compare_path(item1: str, item2: str):
             return_value = 1
         elif item1 < item2:
             return_value = -1
-        else: return_value = 0
+        else:
+            return_value = 0
 
     return return_value
 
+
 def save_file(parent_dir, file: FileStorage):
-    list_partition = sorted(os.listdir(parent_dir), key=cmp_to_key(compare_path))  # list level1 + sorted
+    list_partition = sorted(
+        os.listdir(parent_dir), key=cmp_to_key(compare_path)
+    )  # list level1 + sorted
     partition = ""
 
     if len(list_partition) == 0:
         partition = "a"
         mkdir(os.path.join(parent_dir, partition))
     elif len(list_partition) > 0:
-        partition = list_partition[len(list_partition) - 1]
+        partition = get_latest_partition(list_partition)
 
     if len(os.listdir(os.path.join(parent_dir, partition))) >= FILE_EACH_PARTITION:
         partition = next_string(partition)
@@ -106,21 +124,25 @@ def save_file(parent_dir, file: FileStorage):
     file.save(secure_f)
 
     return {
-        "filename": secure_f,
+        "filename": os.path.join(
+            partition, os.path.basename(os.path.normpath(secure_f))
+        ),
         "size": os.stat(secure_f).st_size,
         "size_measure": "bytes",
     }
 
 
 def move_file(parent_dir, full_file_dir):
-    list_partition = sorted(os.listdir(parent_dir), key=cmp_to_key(compare_path))  # list level1 + sorted
+    list_partition = sorted(
+        os.listdir(parent_dir), key=cmp_to_key(compare_path)
+    )  # list level1 + sorted
     partition = ""
 
     if len(list_partition) == 0:
         partition = "a"
         mkdir(os.path.join(parent_dir, partition))
     elif len(list_partition) > 0:
-        partition = list_partition[len(list_partition) - 1]
+        partition = get_latest_partition(list_partition)
 
     if len(os.listdir(os.path.join(parent_dir, partition))) >= FILE_EACH_PARTITION:
         partition = next_string(partition)
@@ -133,10 +155,15 @@ def move_file(parent_dir, full_file_dir):
         f"{secure_f.rsplit('.', 1)[0]}-{str(uuid.uuid4())}.{extension}",
     )
 
-    os.rename(full_file_dir, secure_f)
+    shutil.copy(full_file_dir, secure_f)
+    
+    if os.path.exists(full_file_dir):
+        os.remove(full_file_dir)
 
     return {
-        "filename": secure_f,
+        "filename": os.path.join(
+            partition, os.path.basename(os.path.normpath(secure_f))
+        ),
         "size": os.stat(secure_f).st_size,
         "size_measure": "bytes",
     }

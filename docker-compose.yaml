@@ -9,6 +9,12 @@ services:
       - ./src:/home/root/src:rw
       - ./requirements.txt:/home/root/requirements.txt:rw
       - ./container_share.log:/home/root/container_share.log
+      - ./data/hls:/mnt/hls
+      - ./data/cdn:/mnt/cdn
+    ports:
+      - "8088:8080" # nginx
+      - "5055:5001" # flask server
+
     entrypoint: ["tail", "-f", "/home/root/container_share.log"]
     networks:
         sound-sharing-HLS:

@@ -2,3 +2,4 @@ src/upload_cdn/
 src/upload_sound/
 .venv/
 src/__pycache__/
+data/
