@@ -3,22 +3,33 @@ version: "3.9"
 services:
   nginx_rtmp:
     build:
-        context: ./docker
-        dockerfile: stream_server.Dockerfile
+      context: ./docker
+      dockerfile: stream_server.Dockerfile
+    volumes:
+      - ./data/hls:/mnt/hls
+      - ./data/cdn:/mnt/cdn
+    ports:
+      - "8089:1935" # nginx rtmp
+      - "8088:8080" # nginx http
+
+    entrypoint: 
+    networks:
+      sound-sharing-HLS:
+        ipv4_address: 128.0.3.2
+  cdn:
+    build:
+      context: ./docker
+      dockerfile: cdn.Dockerfile
     volumes:
       - ./src:/home/root/src:rw
       - ./requirements.txt:/home/root/requirements.txt:rw
       - ./container_share.log:/home/root/container_share.log
-      - ./data/hls:/mnt/hls
-      - ./data/cdn:/mnt/cdn
     ports:
-      - "8088:8080" # nginx
       - "5055:5001" # flask server
-
-    entrypoint: ["tail", "-f", "/home/root/container_share.log"]
     networks:
-        sound-sharing-HLS:
-          ipv4_address: 128.0.3.2
+      sound-sharing-HLS:
+        ipv4_address: 128.0.3.3
+    
 
 networks:
   sound-sharing-HLS:
