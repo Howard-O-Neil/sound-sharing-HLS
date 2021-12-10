@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 import partition
 import sound
 
@@ -20,6 +20,10 @@ app = Flask(__name__)
 def hello():
     return "Sound Sharing HLS Server"
 
+@app.route("/serve", methods=["GET"])
+def serve_static():
+    file_id = request.args.get("file-id")
+    return send_from_directory(CDN_DIR, file_id)
 
 @app.route("/sound-uploader", methods=["GET"])
 def upload_file_template():

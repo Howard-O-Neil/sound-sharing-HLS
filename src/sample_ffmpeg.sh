@@ -24,3 +24,13 @@ ffmpeg -re -stream_loop -1 \
 ffmpeg -re -i ab/1639128337876-26898697-26fe-4bd2-baf6-9b4a31ee1d54.mp4 \
         -bsf:v h264_mp4toannexb \
         -c copy -f mpegts rtmp://128.0.3.2:1935/show/vid1
+
+ffmpeg -re -stream_loop -1 \
+    -i /mnt/cdn/ab/1639128337876-26898697-26fe-4bd2-baf6-9b4a31ee1d54.mp4 \
+    -vcodec copy -c:a aac -b:a 160k -ar 44100 \
+    -strict -2 -f flv rtmp://128.0.3.2:1935/show/sound2
+
+ffmpeg -re -stream_loop -1 \
+    -i /mnt/cdn/ab/Symphony_No.6_1st_movement-8950f11f-f22f-46e9-9da1-2c5c95d0a890.mp3 \
+    -vcodec copy -c:a aac -b:a 160k -ar 44100 \
+    -strict -2 -f flv rtmp://128.0.3.2:1935/show/sound2

@@ -10,7 +10,7 @@ RUN apt install -y build-essential libpcre3 libpcre3-dev libssl-dev zlib1g zlib1
 # configure nginx
 RUN wget -qO - https://nginx.org/download/nginx-1.20.2.tar.gz | tar -xvz -C /usr/local/
 RUN mkdir -p /usr/local/nginx-rtmp-module && \ 
-    git clone https://github.com/sergey-dryabzhinsky/nginx-rtmp-module.git /usr/local/nginx-rtmp-module/
+    git clone https://github.com/arut/nginx-rtmp-module.git /usr/local/nginx-rtmp-module/
 
 WORKDIR /usr/local/nginx-1.20.2
 
