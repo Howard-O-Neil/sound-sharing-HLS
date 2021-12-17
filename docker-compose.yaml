@@ -6,11 +6,19 @@ services:
       context: ./docker
       dockerfile: stream_server.Dockerfile
     volumes:
-      - ./data/hls:/home/root/hls
+      - ./data/hls:/home/root/stream/hls
+      - ./data/dash:/home/root/stream/dash
+      - ./src/stream_server.py:/home/root/stream/stream_server.py:rw
       - ./src/nginx.conf:/usr/local/nginx/conf/nginx.conf:rw
-    ports:
-      - "8089:1935" # nginx rtmp
-      - "8088:8080" # nginx http
+    # ports:
+    #   - "8089:1935" # nginx rtmp
+    #   - "8088:8080" # nginx http
+
+    # expose without publish to host
+    expose:
+      - "1935" # nginx rtmp
+      - "8080" # nginx http
+      - "5001" # flask server
 
     # entrypoint: use default in dockerfile 
     networks:
@@ -25,8 +33,13 @@ services:
       - ./requirements.txt:/home/root/requirements.txt:rw
       - ./container_share.log:/home/root/container_share.log
       - ./data/cdn:/mnt/cdn
-    ports:
-      - "5055:5001" # flask server
+    # ports:
+    #   - "5055:5001" # flask server
+    
+    # expose without publish to host
+    expose:
+      - "5001" # flask server
+
     # entrypoint: use default in dockerfile
     networks:
       sound-sharing-HLS:

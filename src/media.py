@@ -1,9 +1,12 @@
+import json
 import subprocess
 import uuid
 import os
 import random
 import string
 import partition
+import threading
+import requests
 
 this_dir = os.getcwd()
 
@@ -41,22 +44,58 @@ def get_wav(parent_dir, full_file_dir: str, width=600, height=120):
         return partition.move_file(parent_dir, out_file_name)
     return {"error": 500, "message": "IDK what happen too :)))"}
 
-def random_char(y):
-    return ''.join(random.choice(string.ascii_letters) for _ in range(y))
 
-def ffmpeg_stream(parent_dir: str, sound_id: str):
+def random_char(y):
+    return "".join(random.choice(string.ascii_letters) for _ in range(y))
+
+
+def ffmpeg_stream_loop(parent_dir: str, sound_id: str, replace_path_str: str, replace_dot_str: str):
     sound_file = os.path.join(parent_dir, sound_id)
-    random_str = random_char(10)
 
     bash_cmd = f"""
         ffmpeg -re -stream_loop -1 \
             -i {sound_file} \
-            -vcodec copy -c:a aac -b:a 160k -ar 44100 \
-            -strict -2 -f flv rtmp://128.0.3.2:1935/show/{sound_id.replace("/", random_str)}
+            -vcodec copy -preset ultrafast -c:a aac -b:a 160k -ar 44100 \
+            -strict -2 -f flv rtmp://128.0.3.2:1935/show/{sound_id.replace("/", replace_path_str).replace(".", replace_dot_str)}
     """
     bash_cmd = bash_cmd.strip()
 
     process = subprocess.Popen(
         bash_cmd, bufsize=2048, stdout=subprocess.PIPE, shell=True
     )
-    return ( process, random_str )
+    return process
+
+
+def ffmpeg_create_stream_playlist(
+    parent_dir: str,
+    sound_id: str,
+    replace_path_str: str,
+    replace_dot_str: str,
+    update_play_list_url: str,
+):
+    sound_file = os.path.join(parent_dir, sound_id)
+
+    def run_bash(onExit):
+        bash_cmd = f"""
+            ffmpeg -re \
+            -i {sound_file} \
+            -vcodec copy -preset ultrafast -c:a aac -b:a 160k -ar 44100 \
+            -strict -2 -f flv rtmp://128.0.3.2:1935/show/{sound_id.replace("/", replace_path_str).replace(".", replace_dot_str)}
+        """
+        bash_cmd = bash_cmd.strip()
+
+        process = subprocess.Popen(
+            bash_cmd, bufsize=2048, stdout=subprocess.PIPE, shell=True
+        )
+        process.wait()
+        onExit()
+
+    def update_playlist():
+        post_obj = {"stream-id": sound_id.replace("/", replace_path_str).replace(".", replace_dot_str)}
+
+        requests.post(update_play_list_url, json=post_obj)
+
+    thread = threading.Thread(target=run_bash, args=(update_playlist,))
+    thread.start()
+
+    return thread

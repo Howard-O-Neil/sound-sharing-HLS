@@ -14,16 +14,17 @@ RUN mkdir -p /usr/local/nginx-rtmp-module && \
 
 WORKDIR /usr/local/nginx-1.20.2
 
-RUN mkdir -p /home/root/hls
+RUN mkdir -p /home/root/stream/
 
 RUN ./configure --with-http_ssl_module --add-module=../nginx-rtmp-module
 RUN make -j 1
 RUN make install
 
-# apply configuration
-COPY nginx.conf /home/root/
-WORKDIR /home/root/
-
-RUN cat nginx.conf > /usr/local/nginx/conf/nginx.conf
+# configure python3
+RUN add-apt-repository ppa:deadsnakes/ppa
+RUN apt update
+RUN apt install -y python3.8 python3-distutils
+RUN wget -qO - https://bootstrap.pypa.io/get-pip.py | python3
+RUN python3 -m pip install flask python-dotenv requests
 
 ENTRYPOINT [ "/usr/local/nginx/sbin/nginx", "-g", "daemon off;" ]

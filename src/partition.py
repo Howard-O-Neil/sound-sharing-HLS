@@ -8,7 +8,6 @@ from werkzeug.utils import secure_filename
 
 FILE_EACH_PARTITION = 3
 
-
 def check_full_z(name):
     for character in name:
         if character != "z":
@@ -33,12 +32,9 @@ def check_alphabet_path(s: str):
     return True
 
 def get_latest_partition(l: List[str]):
-    l.reverse()
-
-    for path in l:
-        if not check_alphabet_path(path):
-            continue
-        else: return path
+    if not check_alphabet_path(l[-1]):
+        return None
+    return l[-1]
 
 def next_string(s: str):
     s = list(s.lower())
@@ -52,23 +48,19 @@ def next_string(s: str):
     for idx in range(len(reverse_s)):
         char = reverse_s[idx]
         i = len(s) - (idx + 1)
-        next_char = next_letter(char)
 
         if char == "z":
             continue
+        
+        next_char = next_letter(char)
 
-        if next_char == "z":
+        if i < len(s) - 1:
+            s[i] = next_char
+            return "".join(s[: (i + 1)]) + ("a" * (len(s) - 1 - i))
+        else:
             s[i] = next_char
             flag = True
             break
-        else:
-            if i < len(s) - 1:
-                s[i] = next_char
-                return "".join(s[: (i + 1)]) + ("a" * (len(s) - 1 - i))
-            else:
-                s[i] = next_char
-                flag = True
-                break
 
     if flag == False:  # very end condition, in case algorithm get error
         return "a" * (len(s) + 1)
@@ -110,6 +102,10 @@ def save_file(parent_dir, file: FileStorage):
     elif len(list_partition) > 0:
         partition = get_latest_partition(list_partition)
 
+    if partition == None:
+        partition = "a" * (len(list_partition[-1]) + 1)
+        mkdir(os.path.join(parent_dir, partition))
+    
     if len(os.listdir(os.path.join(parent_dir, partition))) >= FILE_EACH_PARTITION:
         partition = next_string(partition)
         mkdir(os.path.join(parent_dir, partition))

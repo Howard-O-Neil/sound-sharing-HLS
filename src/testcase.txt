@@ -1,0 +1,7 @@
+## USE-CASE 1
+test create stream from file id
+
+    + test serve file id
+    + create stream with file id
+    + test serve from frontend
+        + run live server demo/hls.js

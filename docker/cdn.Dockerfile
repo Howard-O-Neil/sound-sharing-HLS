@@ -9,13 +9,8 @@ RUN add-apt-repository ppa:deadsnakes/ppa
 RUN apt update
 RUN apt install -y python3.8 python3-distutils
 RUN wget -qO - https://bootstrap.pypa.io/get-pip.py | python3
-RUN python3 -m pip install flask python-dotenv
+RUN python3 -m pip install flask python-dotenv requests
 
-RUN mkdir /mnt/cdn
-
-COPY startup.sh /home/root/
-WORKDIR /home/root/
-
-RUN chmod +x startup.sh
+RUN mkdir -p /mnt/cdn
 
 ENTRYPOINT [ "tail", "-f", "/home/root/container_share.log" ]
