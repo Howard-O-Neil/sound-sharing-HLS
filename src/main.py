@@ -1,6 +1,8 @@
 
 from flask import Flask, render_template, request, send_from_directory
 from pprint import pprint
+from flask_cors import CORS
+
 import partition
 import media
 
@@ -29,6 +31,7 @@ def random_char(y):
     return ''.join(random.choice(string.ascii_letters) for _ in range(y))
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route("/", methods=["GET"])
 def hello():
@@ -114,37 +117,6 @@ def create_content_stream():
             "stream-id-2": stream_id.rsplit(".", 1)[0] + "-X-ENDLIST.m3u8",
         })
 
-    # return "fuck"
-
-
-    # return json.dumps({
-    #     "sound-id": file_id,
-    #     "stream-id": stream_id
-    # })
-
-    # if sound_id not in stream_process:
-    #     stream_process[sound_id] = {
-    #         1: None,
-    #         2: None,
-    #     }
-
-    #     return json.dumps({
-    #         "hls-url": f"http://{STREAM_SERVER}/hls/{stream_process[sound_id][2]}.m3u8",
-    #         "dash-url":  f"http://{STREAM_SERVER}/dash/{stream_process[sound_id][2]}.mpd",
-    #         "rtmp-url": f"rtmp://{STREAM_SERVER}:1935/show/{stream_process[sound_id][2]}"
-    #     })
-    # else:
-    #     print("===============================")
-    #     print(stream_process[sound_id][1].pid)
-    #     return json.dumps({
-    #             "error": 400,
-    #             "message": "stream already served",
-    #             "hls-url": f"http://{STREAM_SERVER}/hls/{stream_process[sound_id][2]}.m3u8",
-    #             "dash-url":  f"http://{STREAM_SERVER}/dash/{stream_process[sound_id][2]}.mpd",
-    #             "rtmp-url": f"rtmp://{STREAM_SERVER}:1935/show/{stream_process[sound_id][2]}"
-    #     })
-
-
 @app.route("/file-uploader", methods=["GET"])
 def upload_file_template():
     return render_template("upload.html")
@@ -158,7 +130,11 @@ def upload_file():
         if (f.filename.rsplit('.', 1)[1].lower() == 'wav' or
             f.filename.rsplit('.', 1)[1].lower() == 'mp3' or
             f.filename.rsplit('.', 1)[1].lower() == 'm4a' or
-            f.filename.rsplit('.', 1)[1].lower() == 'mp4'):
+            f.filename.rsplit('.', 1)[1].lower() == 'mp4' or
+            f.filename.rsplit('.', 1)[1].lower() == 'png' or
+            f.filename.rsplit('.', 1)[1].lower() == 'jpg' or
+            f.filename.rsplit('.', 1)[1].lower() == 'jpeg' or
+            f.filename.rsplit('.', 1)[1].lower() == 'svg'):
 
             return json.dumps(partition.save_file(CDN_DIR, f))
         else:
